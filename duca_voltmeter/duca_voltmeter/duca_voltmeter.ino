@@ -3,6 +3,8 @@
 #include <Wire.h> 
 #include <U8x8lib.h>
 
+#define CORRECTION_COEFF  1.076
+
 int analogInput = A0;
 float vout = 0.0;
 float vin = 0.0;
@@ -42,16 +44,11 @@ void printValueOnDisplay(uint8_t xPos, uint8_t yPos, uint8_t value)
 void printVoltageOnDisplay(uint8_t xPos, uint8_t yPos, float value)
 {
   oled.setCursor(0, yPos);
-  oled.print("              *");
+  oled.print("         ");
   oled.setCursor(xPos, yPos);
   
   oled.print(value);
-  // oled.print("/");
-  // oled.print(int(value / 1000.0));
-  // oled.print(".");
-  // int fract_part = (int)(value / 10.0) % 100;
-  // if (fract_part < 10) {oled.print("0");}
-  // oled.print(fract_part);
+  oled.print("v");
 }
 
 
@@ -63,7 +60,7 @@ void setup() {
   // Set up OLED display
   oled.begin();
   oled.setPowerSave(0);
-  oled.setFont(u8x8_font_chroma48medium8_r); // u8x8_font_chroma48medium8_r u8x8_font_px437wyse700a_2x2_r u8g2_font_courB12_tf 
+  oled.setFont(u8x8_font_px437wyse700a_2x2_r); // u8x8_font_chroma48medium8_r u8x8_font_px437wyse700a_2x2_r u8g2_font_courB12_tf 
   oled.setContrast(11);
 
 }
@@ -71,12 +68,12 @@ void setup() {
 void loop() {
   value = analogRead(/*A0*/analogInput);
   vout = (value * 5.0) / 1024.0;
-  vin = vout / (R2 / (R1 + R2));
+  vin = CORRECTION_COEFF * vout / (R2 / (R1 + R2));
   if (vin < 0.01)
   {
     vin = 0.0;
   }
-  printVoltageOnDisplay(3, 1, vin);
-  printValueOnDisplay(5, 3, value);
-  delay(300);
+  printVoltageOnDisplay(3, 0, vin);
+  //printValueOnDisplay(5, 3, value);
+  delay(2000);
 }
